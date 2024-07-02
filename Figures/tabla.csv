@@ -1,0 +1,35 @@
+,Estimate,Pr(>|t|),significance
+(Intercept),7.5,8.47e-12,***
+Fueltype gas,-0.23,0.54,not significant
+Aspiration Turbo,0.08,0.10,not significant
+Doornumber two,-0.03,0.28,not significant
+Carbody Hardtop,-0.16,0.05,*
+Carbody Hatchback,-0.21,1.87e-03,**
+Carbody Sedan,-0.14,0.06,.
+Carbody Wagon,-0.15,0.06,.
+Drivewheel fwd,-0.04,0.52,not significant
+Drivewheel rwd,-6.23e-03,0.93,not significant
+enginelocation rear,0.78,6.63e-09,***
+cylinder num5,0.04,0.75,not significant
+cylinder num4,0.20,0.19,not significant
+cylinder num6,0.04,0.75,not significant
+cylinder num3,0.51,0.02,*
+cylinder num12,-0.13,0.66,not significant
+cylinder num2,0.31,0.12,not significant
+Audi,0.07,0.62,not significant
+BMW,0.36,8.25e-04,***
+Buick,-0.05,0.72,not significant
+Chevrolet,-0.25,0.05,.
+Dodge,-0.35,1.07e-03,**
+Honda,-0.18,0.09,.
+Isuzu,-0.16,0.30,not significant
+Jaguar,-0.37,0.02,*
+Mazda,-0.09,0.34,not significant
+Mercury,-0.15,0.32,not significant
+Mitsubishi,-0.40,2.21e-04,***
+Nissan,-0.15,0.12,not significant
+Peugeot,-0.37,4.53e-03,**
+Plymouth,-0.36,8.23e-04,***
+Porsche,0.03,0.83,not significant
+Renault,-0.27,0.05,.
+Saab,0.1,0.39,not significant
