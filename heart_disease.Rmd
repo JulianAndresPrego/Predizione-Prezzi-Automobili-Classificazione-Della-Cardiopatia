@@ -1,0 +1,236 @@
+---
+title: "Project Work"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Distribuzione log normal
+
+
+```{r}
+malattia_cardiaca<-read.csv('C:/Users/Juli/Desktop/Progetto/data/heart.csv')
+colnames(malattia_cardiaca)
+colnames(malattia_cardiaca) <- c("Età", "Sesso", "TipoDoloreToracico", "PressioneSanguignaRiposo",
+                                 "Colesterolo", "GlicemiaBasale", "ECGRiposo",
+                                 "FrequenzaCardiacaMassima", "AnginaEsercizio", "DepressioneST",
+                                 "PendenzaST", "MalattiaCardiaca")
+
+```
+```{r}
+malattia_cardiaca$MalattiaCardiaca <- as.factor(malattia_cardiaca$MalattiaCardiaca)
+malattia_cardiaca$TipoDoloreToracico <- as.factor(malattia_cardiaca$TipoDoloreToracico)
+malattia_cardiaca$AnginaEsercizio <- as.factor(malattia_cardiaca$AnginaEsercizio)
+malattia_cardiaca$PendenzaST <- as.factor(malattia_cardiaca$PendenzaST)
+malattia_cardiaca$Sesso <- as.factor(malattia_cardiaca$Sesso)
+summary(malattia_cardiaca)
+```
+
+
+```{r}
+head(malattia_cardiaca)
+```
+```{r}
+library(ggplot2)
+ggplot(data = malattia_cardiaca,  aes(x = Età,  y = PressioneSanguignaRiposo, color =  
+                 Sesso)) + 
+     geom_point()
+```
+
+
+```{r}
+head(malattia_cardiaca)
+```
+
+```{r}
+malattia_logit <- glm(MalattiaCardiaca ~ ., data = malattia_cardiaca, family = binomial)
+summary(malattia_logit)
+```
+```{r}
+malattia_logit_ridotto = step(malattia_logit)
+```
+
+```{r}
+summary(malattia_logit_ridotto)
+```
+
+```{r}
+LLR = 2 * (logLik(malattia_logit) - logLik(malattia_logit_ridotto))
+cat(logLik(malattia_logit), logLik(malattia_logit_ridotto))
+df = malattia_logit_ridotto$df.residual - malattia_logit$df.residual
+p_value = 1 - pchisq(LLR, df)
+print(df)
+cat('La statistica del test del rapporto di verosimiglianza è', LLR, 'e il p-value è ', p_value, 'con df', df)
+
+```
+
+```{r}
+
+malattia_logit_tutto_quadrato = glm(MalattiaCardiaca ~.  + I(FrequenzaCardiacaMassima^2) + I(Età^2) + I(DepressioneST^2) + I(PressioneSanguignaRiposo^2) + I(Colesterolo^2), family = binomial, data = malattia_cardiaca)
+summary(malattia_logit_tutto_quadrato)
+
+```
+```{r}
+malattia_logit_quadrato_ridotto = step(malattia_logit_tutto_quadrato)
+summary(malattia_logit_quadrato_ridotto)
+
+```
+```{r}
+LLR = 2 * (logLik(malattia_logit_tutto_quadrato) - logLik(malattia_logit_quadrato_ridotto))
+df = malattia_logit_quadrato_ridotto$df.residual - malattia_logit_tutto_quadrato$df.residual
+p_value = 1 - pchisq(LLR, df)
+print(logLik(malattia_logit_tutto_quadrato))
+print(logLik(malattia_logit_quadrato_ridotto))
+cat('La statistica del test del rapporto di verosimiglianza è', LLR, 'e il p-value è ', p_value)
+
+```
+
+```{r}
+malattia_logit_tutte_interazioni = glm(MalattiaCardiaca ~. +(FrequenzaCardiacaMassima + Età + DepressioneST + PressioneSanguignaRiposo)^2 + I(FrequenzaCardiacaMassima^2) + I(Età^2) + I(DepressioneST^2) + I(PressioneSanguignaRiposo^2), family = binomial, data = malattia_cardiaca)
+summary(malattia_logit_tutte_interazioni)
+
+```
+```{r}
+malattia_logit_interazioni_ridotto = step(malattia_logit_tutte_interazioni, direction = "both")
+```
+```{r}
+summary(malattia_logit_interazioni_ridotto)
+```
+```{r}
+malattia_logit_interazioni_ridotto = glm(formula = MalattiaCardiaca ~ Età + Sesso + TipoDoloreToracico + Colesterolo + 
+    GlicemiaBasale + FrequenzaCardiacaMassima + AnginaEsercizio + DepressioneST + PendenzaST + 
+    I(DepressioneST^2) + FrequenzaCardiacaMassima:DepressioneST, family = binomial, data = malattia_cardiaca)
+summary(malattia_logit_interazioni_ridotto)
+
+```
+
+
+
+```{r}
+LLR = 2 * (logLik(malattia_logit_tutte_interazioni) - logLik(malattia_logit_interazioni_ridotto))
+df = malattia_logit_interazioni_ridotto$df.residual - malattia_logit_tutte_interazioni$df.residual
+p_value = 1 - pchisq(LLR, df)
+print(logLik(malattia_logit_tutte_interazioni))
+print(logLik(malattia_logit_interazioni_ridotto))
+print(df)
+cat('La statistica del test del rapporto di verosimiglianza è', LLR, 'e il p-value è ', p_value)
+
+```
+
+```{r}
+# Modello null per il calcolo del pseudo R-quadro
+null_model = glm(MalattiaCardiaca ~ 1, data = malattia_cardiaca, family = binomial)
+
+# Pseudo R-quadro per malattia_logit_quadrato_ridotto
+Pse_R2 = (deviance(null_model) - deviance(malattia_logit_quadrato_ridotto)) / deviance(null_model)
+cat('Pseudo-R quadro:', Pse_R2, '\n')
+```
+```{r}
+null_model = glm(MalattiaCardiaca ~ 1, data = malattia_cardiaca, family = binomial)
+
+# Pseudo R-quadro per malattia_logit_interazioni_ridotto
+Pse_R2 = (deviance(null_model) - deviance(malattia_logit_interazioni_ridotto)) / deviance(null_model)
+cat('Pseudo-R quadro:', Pse_R2, '\n')
+```
+```{r}
+
+null_model = glm(MalattiaCardiaca~ 1, data = malattia_cardiaca, family = binomial)
+
+# Pseudo R-quadro per malattia_logit_ridotto
+Pse_R2 = (deviance(null_model) - deviance(malattia_logit_ridotto)) / deviance(null_model)
+cat('Pseudo-R quadro:', Pse_R2, '\n')
+```
+```{r}
+# Curve ROC per i tre modelli
+library(pROC)
+invisible(plot(roc(malattia_cardiaca$MalattiaCardiaca,
+                   fitted(malattia_logit_ridotto)),
+               print.auc = TRUE,
+               col = "#5da492", 
+               main = "Curve ROC: 3 modelli",
+               legend = 'Modello logistico di covariate pure'))
+
+invisible(plot(roc(malattia_cardiaca$MalattiaCardiaca,
+                   fitted(malattia_logit_quadrato_ridotto)),
+               print.auc = FALSE, 
+               col = "#206376", 
+               add = TRUE))
+invisible(plot(roc(malattia_cardiaca$MalattiaCardiaca,
+                   fitted(malattia_logit_interazioni_ridotto)),
+               print.auc = FALSE,
+               col = "#bee7a3", 
+               add = TRUE))
+
+color = c("#5da492","#206376","#bee7a3")
+```
+
+```{r}
+# Plot delle ROC con ggplot2
+library(reshape2)
+library(plotROC)
+ROC = data.frame(h = malattia_cardiaca$MalattiaCardiaca, 
+                 model1 = fitted(malattia_logit_ridotto), 
+                 model2 = fitted(malattia_logit_quadrato_ridotto), 
+                 model3 = fitted(malattia_logit_interazioni_ridotto))
+ROC$h = as.numeric(as.character(ROC$h))
+longtest <- melt_roc(ROC, "h", c("model3", "model2", "model1"))
+
+p <-ggplot(longtest, aes(d = D, m = M, color = name), main = "Curva ROC per 3 modelli", 
+       xlab = "False Positive Rate (1-Specificity)", ylab = "True Positive Rate (Sensitivity)") + 
+    geom_roc() +
+    style_roc() +  
+    ggtitle('Plot ROC per tre modelli')
+p
+ggsave('C:/Users/Juli/Desktop/Progetto/Figures/roc_plot.png', p, width = 8, height = 5)
+
+   
+```
+
+
+### Devizione test
+```{r}
+s = summary(malattia_logit_quadrato_ridotto)
+dev = deviance(malattia_logit_quadrato_ridotto)
+
+p_value = 1-pchisq(dev, s$df.residual)
+cat('La devianza del modello è:', dev, 'con gradi di libertà di', s$df.residual, '\n')
+cat('p_value è:', p_value, '\n')
+```
+
+```{r}
+s = summary(malattia_logit_interazioni_ridotto)
+dev = deviance(s)
+
+p_value = 1-pchisq(dev, s$df.residual)
+cat('La devianza del modello è:', dev, 'con gradi di libertà di', s$df.residual, '\n')
+cat('p_value è:', p_value, '\n')
+
+```
+
+
+```{r}
+s = summary(malattia_logit_ridotto)
+dev = deviance(s)
+
+p_value = 1-pchisq(dev, s$df.residual)
+cat('La devianza del modello è:', dev, 'con gradi di libertà di', s$df.residual, '\n')
+cat('p_value è:', p_value, '\n')
+```
+
+
+```{r}
+# Coefficienti e intervalli di confidenza del modello malattia_logit_quadrato_ridotto
+malattia_logit_quadrato_ridotto$coefficients
+confint.default(malattia_logit_quadrato_ridotto)
+```
+
+
+```{r}
+# Esponenti dei coefficienti e intervalli di confidenza del modello malattia_logit_quadrato_ridotto
+exp(malattia_logit_quadrato_ridotto$coefficients)
+exp(confint.default(malattia_logit_quadrato_ridotto))
+```
