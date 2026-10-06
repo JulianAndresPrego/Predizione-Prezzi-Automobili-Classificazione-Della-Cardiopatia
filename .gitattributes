@@ -1,0 +1,14 @@
+# Normalizar saltos de línea para evitar problemas de compatibilidad (Windows, Mac, Linux)
+* text=auto eol=lf
+
+# Declarar explícitamente los tipos de archivos como texto
+*.R text
+*.Rmd text
+*.html text
+*.md text
+
+# Indicar a Linguist que ignore el HTML generado para que NO altere el gráfico de lenguajes
+*.html linguist-generated=true
+
+# Opcional: Si compilas informes interactivos o presentaciones en HTML y no quieres que cuenten como código
+# docs/*.html linguist-documentation=true
